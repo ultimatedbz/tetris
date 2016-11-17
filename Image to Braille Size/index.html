@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Page Title</title>
+  </head>
+  <body>
+    <canvas id="myCanvas" width="200" height="100" style="border:1px solid black"></canvas>
+    <canvas id="myCanvas2" width="200" height="100" style="border:1px solid black"></canvas>
+    <canvas id="myCanvas3" width="200" height="100" style="border:1px solid black"></canvas>
+    <canvas id="myCanvas4" width="200" height="100" style="border:1px solid black"></canvas>
+  <script>
+    var c = document.getElementById("myCanvas");
+    var c2 = document.getElementById("myCanvas2");
+    var c3 = document.getElementById("myCanvas3");
+    var c4 = document.getElementById("myCanvas4");
+    var context = c.getContext('2d');
+    var context2 = c2.getContext('2d');
+    var context3 = c3.getContext('2d');
+    var context4 = c4.getContext('2d');
+
+    // Converted to Black and White.
+    var imageObj = new Image();
+    imageObj.onload = function() {
+      c.width = imageObj.width;
+      c.height = imageObj.height;
+      c2.width = imageObj.width;
+      c2.height = imageObj.height;
+      context.drawImage(imageObj, 0, 0);
+      var imgData = context.getImageData(0, 0, c.width, c.height);
+      var data = imgData.data;
+      for (var i = 0; i < data.length; i+=4) {
+        data[i] = data[i] > 160 ? 255 : 0;
+        data[i+1] = data[i] > 160 ? 255 : 0;
+        data[i+2] = data[i] > 160 ? 255 : 0;
+      }
+      context2.putImageData(imgData, 0, 0, 0,0,c2.width, c2.height);
+
+
+      // Scaled down to 80 x 36.
+      c3.width = 40 * 2;
+      c3.height = 9 * 4;
+      var imageData3 = context3.createImageData(c3.width, c3.height);
+      var data3 = imageData3.data;
+      var xScale = c2.width/c3.width;
+      var yScale = c2.height/c3.height;
+      for (var i = 0; i < c3.height; i++) {
+        for (var j = 0; j < c3.width; j++) {
+          var newX = Math.floor(j * xScale);
+          var newY = Math.floor(i * yScale);
+          var index = newX * 4 + newY * 4 * c2.width;
+
+          var index3 = i * 4 * c3.width + 4 * j;
+
+          data3[index3] = data[index];
+          data3[index3+1] = data[index+1];
+          data3[index3+2] = data[index+2];
+          data3[index3+3] = data[index+3];
+        }
+      }
+      context3.putImageData(imageData3, 0, 0);
+
+      // Scaled up.
+      c4.width = c3.width * 4;
+      c4.height = c3.height * 4;
+      var imageData4 = context4.createImageData(c4.width, c4.height);
+      var data4 = imageData4.data;
+      var xScale = c3.width/c4.width;
+      var yScale = c3.height/c4.height;
+      for (var i = 0; i < c4.height; i++) {
+        for (var j = 0; j < c4.width; j++) {
+          var newX = Math.floor(j * xScale);
+          var newY = Math.floor(i * yScale);
+          var index = newX * 4 + newY * 4 * c3.width;
+
+          var index4 = i * 4 * c4.width + 4 * j;
+
+          data4[index4] = data3[index];
+          data4[index4+1] = data3[index+1];
+          data4[index4+2] = data3[index+2];
+          data4[index4+3] = data3[index+3];
+        }
+      }
+      context4.putImageData(imageData4, 0, 0);
+    }
+    imageObj.src = 'twitter.png';
+
+  </script>
+  </body>
+</html>
